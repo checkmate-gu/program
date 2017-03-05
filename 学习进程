@@ -1,3 +1,42 @@
-
+3-4
+学习GitHub的基本使用方法 搭建python的开发环境
 3-5
-2个小时左右的时间用于python语言的基本入门（1：00~3:00）以及python开发环境的搭建
+2个小时左右的时间用于python语言的基本入门（1：00~3:00）
+3个小时左右的时间用于基本了解python的网络编程（从来没接触过网络编程...）并简单了解socket编程的基本方法...基本完成第一步。
+
+#Echo服务器端
+from socketserver import TCPServer as TCP, StreamRequestHandler as SRH  
+  
+HOST = ''  
+PORT = 21567  
+ADDR = (HOST, PORT)  
+  
+class MyRequestHandler(SRH):  
+    def handle(self):  
+        print('...connected from:', self.client_address)  
+        self.wfile.write(('%s' %(self.rfile.readline().decode())).encode())  
+  
+tcpServ = TCP(ADDR, MyRequestHandler)  
+print('waiting for connection...')  
+tcpServ.serve_forever()  
+
+#Echo客户端
+from socket import *  
+  
+HOST = '127.0.0.1'  
+PORT = 21567  
+BUFSIZE = 1024  
+ADDR = (HOST, PORT)  
+  
+while True:  
+    tcpCliSock = socket(AF_INET, SOCK_STREAM)  
+    tcpCliSock.connect(ADDR)  
+    data = input('input something:')  
+    if not data:  
+        break  
+    tcpCliSock.send(('%s\r\n' % data).encode())  
+    data = tcpCliSock.recv(BUFSIZE).decode()  
+    if not data:  
+        break  
+    print(data.strip())  
+tcpCliSock.close()  
