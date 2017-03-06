@@ -40,3 +40,17 @@ while True:
         break  
     print(data.strip())  
 tcpCliSock.close()  
+
+实现数据库基本操作的思路：要实现数据的增、删、查的功能，分别定义三个函数
+def __set__(key,value)
+def __get__(key)
+def __delete(key)
+对从client端拿到的信息进行了st = ('%s' % (self.rfile.readline().decode())).encode()解码之后可以得到基本的字符串，
+在对其进行了st.split()之后可以返回由若干子串组成的列表。
+这里有一个奇怪的现象出现，在测试中首先输出st.split()，每一个字符串之中都会出现b''
+eg：input something:set a number
+==>[b'set',b'a',b'number']
+但是这里依旧可以用字符串的处理方法进行判断，在判断出是set,get,还是delete之后要对不同的命令进行不同的操作。
+如果是set，则调用__set__(key,value)方法
+对于__set__(key,value)方法，有两个参数，key是属性的名称，value是要赋的值。
+则在此处要先建立一个基本的数据库可供操作?
