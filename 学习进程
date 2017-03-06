@@ -104,3 +104,57 @@ tcpServ.serve_forever()
 
 尝试运行后发现只要是输入‘set’、‘get’、‘delete’相关的语句都不能执行，报错信息为
 TypeError: 'Database' object does not support indexing
+
+经过一整晚的修改，将server端的代码修改如下，但仍然只能完成set函数和ILLEGAL的输出，对于GET和DELETE部分尚不能完成。
+但是这里存在一个致命的弱点，就是每输入一次会建立一个新的datebase对象，那么意味着每输入一次会建立一个新的字典，这样一来，
+delete函数和get函数无论如何都是无法完成任务的。
+# encoding: utf-8
+# Echo服务器端
+from socketserver import TCPServer as TCP, StreamRequestHandler as SRH
+
+HOST = ''
+PORT = 21566
+ADDR = (HOST, PORT)
+
+class MyRequestHandler(SRH):
+    def handle(self):
+        print('...connected from:', self.client_address)
+        st = ('%s' % (self.rfile.readline().decode())).encode()
+        db=Database()
+        st1 = (db.basicOperation(st)).encode()
+        self.wfile.write(st1)
+
+class Database():
+    def __init__(self):
+        self.database={}
+    def __set__(self, newstr):
+        self.database[newstr[1]]=newstr[2].rstrip('\'')
+        print(self.database)
+        return ('TRUE')
+    def __get__(self, newstr):
+        st=str(self.database.get(newstr[1]))
+        return st
+    def __delete__(self, newstr):
+        if newstr[1].rstrip('\'') in self.database:
+            del self.database[newstr[1].rstrip('\'')]
+            st='1'
+        else:
+            st='NONE'
+        return st
+    def basicOperation(self, newstr):
+        st=str(newstr.strip()).split()
+        print('here print the st',st)
+        if st[0]=="b'set":
+            return self.__set__(st)
+        else:
+            if st[0]=="b'get":
+                self.__get__(st)
+            else:
+                if st[0]=="b'delete":
+                    self.__delete__(st)
+                else:
+                    return('Illegal Input!')
+
+tcpServ = TCP(ADDR, MyRequestHandler)
+print('waiting for connection...')
+tcpServ.serve_forever()
