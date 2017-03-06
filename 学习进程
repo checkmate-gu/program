@@ -40,7 +40,7 @@ while True:
         break  
     print(data.strip())  
 tcpCliSock.close()  
-
+3-6
 实现数据库基本操作的思路：要实现数据的增、删、查的功能，分别定义三个函数
 def __set__(key,value)
 def __get__(key)
@@ -152,6 +152,77 @@ class Database():
             else:
                 if st[0]=="b'delete":
                     self.__delete__(st)
+                else:
+                    return('Illegal Input!')
+
+tcpServ = TCP(ADDR, MyRequestHandler)
+print('waiting for connection...')
+tcpServ.serve_forever()
+
+经过调试已经基本实现了set/get/delete/illgeal的基本方法，但是还是没能解决单例的问题，今天的代码修改如下。
+# encoding: utf-8
+# Echo服务器端
+from socketserver import TCPServer as TCP, StreamRequestHandler as SRH
+
+HOST = ''
+PORT = 21566
+ADDR = (HOST, PORT)
+
+class MyRequestHandler(SRH):
+    def handle(self):
+        print('...connected from:', self.client_address)
+        st = ('%s' % (self.rfile.readline().decode())).encode()
+        db=Database()
+        print(db.basicOperation(st))
+        st1 = (db.basicOperation(st)).encode()
+        self.wfile.write(st1)
+
+class Singleton(type):
+
+    def __init__(self, name, bases, dic):
+        super(Singleton, self).__init__(name, bases, dic)
+        self.instance = None
+
+    def __call__(self, *args, **kwargs):
+        if self.instance is None:
+            self.instance = super(Singleton, self).__call__(*args, **kwargs)
+        return self.instance
+
+
+class Database():
+
+    __metaclass__=Singleton
+
+    def __init__(self):
+        self.database={}
+
+    def __set__(self, newstr):
+        self.database[newstr[1]]=newstr[2].rstrip('\'')
+        print(self.database)
+        return ('TRUE')
+
+    def __get__(self, newstr):
+        st=self.database.get(newstr[1].rstrip('\''),'The data you input is not in the database!')
+        return st
+
+    def __delete__(self, newstr):
+        if newstr[1].rstrip('\'') in self.database:
+            del self.database[newstr[1].rstrip('\'')]
+            st=1
+        else:
+            st='NONE'
+        return st
+
+    def basicOperation(self, newstr):
+        st=str(newstr.strip()).split()
+        if st[0]=="b'set":
+            return self.__set__(st)
+        else:
+            if st[0]=="b'get":
+                return self.__get__(st)
+            else:
+                if st[0]=="b'delete":
+                    return self.__delete__(st)
                 else:
                     return('Illegal Input!')
 
