@@ -54,3 +54,53 @@ eg：input something:set a number
 如果是set，则调用__set__(key,value)方法
 对于__set__(key,value)方法，有两个参数，key是属性的名称，value是要赋的值。
 则在此处要先建立一个基本的数据库可供操作?
+
+用字典实现了一个基本的数据库操作，仅仅是在server上面做了部署，初步代码如下：
+# encoding: utf-8
+# Echo服务器端
+from socketserver import TCPServer as TCP, StreamRequestHandler as SRH
+
+HOST = ''
+PORT = 21562
+ADDR = (HOST, PORT)
+
+
+class MyRequestHandler(SRH):
+    def handle(self):
+        print('...connected from:', self.client_address)
+        st = ('%s' % (self.rfile.readline().decode())).encode()
+        db=Database()
+        db.basicOperation(st)
+        print(st.split())
+        self.wfile.write(st)
+
+
+class Database():
+    def __init__(self):
+        self.database={}
+    def __set__(self, str):
+        self.database[self[1].lstrip('b')]=self[2].lstrip('b\'').rstrip('\'')
+        print('set')
+    def __get__(self, str):
+        self.database.get(self[1].lstrip('b'), 'The key you input is not in the database!')
+        print('get')
+    def __delete__(self, str):
+        del self.database[self[1].lstrip('b')]
+        print('delete')
+    def basicOperation(self, str):
+        st=str.strip().split();
+        if st[0]==b'set':
+            self.__set__(st)
+        if st[0]==b'get':
+            self.__get__(st)
+        if st[0]==b'delete':
+            self.__delete__(st)
+        else:
+            print('Illegal Input!')
+
+tcpServ = TCP(ADDR, MyRequestHandler)
+print('waiting for connection...')
+tcpServ.serve_forever()
+
+尝试运行后发现只要是输入‘set’、‘get’、‘delete’相关的语句都不能执行，报错信息为
+TypeError: 'Database' object does not support indexing
