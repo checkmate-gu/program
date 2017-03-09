@@ -89,6 +89,50 @@ class Haset(ForDatabase):
                     else:
                         return('Illegal Input!')
 
+class LList(ForDatabase):
+    __metaclass__=Singleton
+    database=[]
+    def __rpush__(self,newstr):
+        self.database.append(newstr[2])
+        return "True"
+    def __lpush__(self,newstr):
+        self.database.insert(0,newstr[2])
+        return "True"
+    def __rpop__(self,newstr):
+        self.database.pop()
+        return "The data has been deleted"
+    def __lpop__(self,newstr):
+        self.database.pop(0)
+        return "The data has been deleted"
+    def __lrange__(self,newstr):
+        st=self.database[newstr[2]:newstr[3]]
+        return st
+    def __llen__(self,newstr):
+        st=str(len(self.database))
+        return st
+    def basicOperation(self, newstr):
+        st = str(newstr.strip()).split()
+        print(st)
+        if st[0] == "rpush":
+            return self.__rpush__(st)
+        else:
+            if st[0] == "lpush":
+                return self.__lpush__(st)
+            else:
+                if st[0] == "rpop":
+                    return self.__rpop__(st)
+                else:
+                    if st[0]=="lpop":
+                        return self.__lpop__(st)
+                    else:
+                        if st[0]=="lrange":
+                            return self.__lrange__(st)
+                        else:
+                            if st[0]=="llen":
+                                return self.__llen__(st)
+                            else:
+                                return('Illegal Input!')
+
 server=socket(AF_INET, SOCK_STREAM)
 server.bind(ADDR)
 server.listen(5)
@@ -108,7 +152,9 @@ while True:
             db=Haset()
             print('db seted 2')
         else:
-            print('noting been executed')
+            if stt=="b'3\\r\\n'":
+                db=LList()
+                print('db seted 3')
     while True:
         data=client.recv(BUFSIZ).decode()
         st1 = (db.basicOperation(data))

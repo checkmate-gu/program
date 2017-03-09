@@ -14,7 +14,7 @@ class ChooseType(object):
     @staticmethod
     def ChooseWhatType():
         print('What kind of data structure you want to choose?')
-        print('You can choose normal database as 1, hashset as 2')
+        print('You can choose normal database as 1, hashset as 2, list as 3')
         t=input('input your number here:')
         print(t)
         typ = str(t).strip()
@@ -35,7 +35,18 @@ class ChooseType(object):
                 print('other input will not be executed!')
                 client.send(('%s\r\n' % typ).encode())
             else:
-                print('Illegal input')
+                if int(t)==3:
+                    print("You must obey the following rules to input:")
+                    print('set the last data: rpush a 1')
+                    print('get the first data: lpush a 1')
+                    print('delete the first data: lpop a')
+                    print('delete the last data: rpop a')
+                    print('get the list length:llen a')
+                    print('get the data from a to b:lrange a 0 5')
+                    print('other input will not be executed!')
+                    client.send(('%s\r\n' % typ).encode())
+                else:
+                    print('Illegal input')
 
 ChooseType().ChooseWhatType()
 
