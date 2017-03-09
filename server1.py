@@ -24,27 +24,27 @@ class Database(ForDatabase):
     __metaclass__ = Singleton
     database={}
     def __set__(self, newstr):
-        self.database[newstr[1]]=newstr[2].rstrip('\'')
+        self.database[newstr[1]]=newstr[2]
         return ('TRUE')
     def __get__(self, newstr):
-        st=self.database.get(newstr[1].rstrip('\''),'The data you input is not in the database!')
+        st=self.database.get(newstr[1],'The data you input is not in the database!')
         return st
     def __delete__(self, newstr):
-        if newstr[1].rstrip('\'') in self.database:
-            del self.database[newstr[1].rstrip('\'')]
+        if newstr[1] in self.database:
+            del self.database[newstr[1]]
             st='the data has already been deleted'
         else:
             st='NONE'
         return st
     def basicOperation(self, newstr):
         st=str(newstr.strip()).split()
-        if st[0]=="b'set":
+        if st[0]=="set":
             return self.__set__(st)
         else:
-            if st[0]=="b'get":
+            if st[0]=="get":
                 return self.__get__(st)
             else:
-                if st[0]=="b'delete":
+                if st[0]=="delete":
                     return self.__delete__(st)
                 else:
                     return('Illegal Input!')
@@ -54,16 +54,16 @@ class Haset(ForDatabase):
     database = {}
 
     def __set__(self, newstr):
-        self.database[newstr[2]] = newstr[3].rstrip('\'')
+        self.database[newstr[2]] = newstr[3]
         return ('TRUE')
 
     def __get__(self, newstr):
-        st = self.database.get(newstr[2].rstrip('\''), 'The data you input is not in the hashset!')
+        st = self.database.get(newstr[2], 'The data you input is not in the hashset!')
         return st
 
     def __delete__(self, newstr):
-        if newstr[2].rstrip('\'') in self.database:
-            del self.database[newstr[2].rstrip('\'')]
+        if newstr[2] in self.database:
+            del self.database[newstr[2]]
             st = 'the data has already been deleted'
         else:
             st = 'The data you want to delete is not in the hashset'
@@ -74,35 +74,24 @@ class Haset(ForDatabase):
 
     def basicOperation(self, newstr):
         st = str(newstr.strip()).split()
-        if st[0] == "b'hset":
+        print(st)
+        if st[0] == "hset":
             return self.__set__(st)
         else:
-            if st[0] == "b'hget":
+            if st[0] == "hget":
                 return self.__get__(st)
             else:
-                if st[0] == "b'hdel":
+                if st[0] == "hdel":
                     return self.__delete__(st)
                 else:
-                    if st[0]=="b'hkeys":
+                    if st[0]=="hkeys":
                         return self.__keys__(st)
                     else:
                         return('Illegal Input!')
 
-'''def choose(db):
-    client, addr = server.accept()
-    stt = ('%s' % (client.recv(BUFSIZ))).encode()
-    if stt == "b'1'":
-        db = Database()
-    if stt == "b'2'":
-        db = Haset()
-    client.close()
-    print("the choose socket has already been closed")'''
-
 server=socket(AF_INET, SOCK_STREAM)
 server.bind(ADDR)
 server.listen(5)
-'''print('waiting for connection...')
-choose(db)'''
 
 while True:
     print('waiting for connection...')
@@ -111,18 +100,18 @@ while True:
     print(stt)
     print(len(stt))
     print(type(stt))
-    if stt == "b'1\r\n'":
+    if stt == "b'1\\r\\n'":
         db=Database()
         print('db seted 1')
     else:
-        if stt=="b'2\r\n'":
+        if stt=="b'2\\r\\n'":
             db=Haset()
             print('db seted 2')
         else:
             print('noting been executed')
     while True:
         data=client.recv(BUFSIZ).decode()
-        st1 = (db.basicOperation(data)).encode()
+        st1 = (db.basicOperation(data))
         if not data:
             break
         client.send(('%s'%st1).encode())
